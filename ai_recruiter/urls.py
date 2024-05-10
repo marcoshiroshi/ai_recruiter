@@ -21,4 +21,5 @@ from .view import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', AiRecruiterView.as_view(), name='ai_recruiter'),
+    path('ajax_mensagem/', mensagem_request, name='ajax_mensagem'),
 ]
