@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Recrutadora</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-Q8izPIyW9zTYSbSbAjGhk0zKJ8gZwleisnkzLWNaIVP8QzfwypLwYuJwPCBfBYKs3NvxOL3OkzJWzlnz\+kRoyGA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+
+        body {
+            background-color: #26292E;
+        }
+
+        #btn-microfone {
+          /* Basic button styles */
+          {#background-color: #007bff;#}
+          color: #fff;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: all 0.5s ease;
+        }
+
+        .pulsating {
+          /* Styles for the pulsating state (animation keyframes not included here) */
+          animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1); /* Tamanho inicial */
+            }
+            50% {
+                transform: scale(1.1); /* Expande 10% */
+            }
+            100% {
+                transform: scale(1); /* Retorna ao tamanho inicial */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Recrutadora Virtual</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chat-box" id="ia-mensagem">
+                                    <p>Olá! Seja bem-vindo(a) à IA Recrutadora. Como posso te ajudar hoje?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Você</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chat-box" id="ia-mensagem">
+                                    <p>Olá! Seja bem-vindo(a) à IA Recrutadora. Como posso te ajudar hoje?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Histórico</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div id="historico-mensagens"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button id="btn-microfone" class="btn btn-danger" onclick='doStartStopCheck()'>
+                                    <i class="fas fa-microphone"></i> Falar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-2 mb-2">
+                            <input type="text" class="form-control" id="mensagem-usuario" placeholder="Envie sua mensagem para a IA">
+                            <button class="btn btn-primary mt-2" id="enviar-mensagem">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var ongoing = false;
+        var recognition = null;
+
+        function verificaStatus(){
+            if (ongoing == true){
+                recognition.start();
+            }
+        }
+
+        const btnMicrofone = document.getElementById('btn-microfone');
+
+        // Function to toggle the pulsating animation class
+        function togglePulsating() {
+          btnMicrofone.classList.toggle('pulsating');
+        }
+
+        function init(){
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.interimResults = true;
+            recognition.lang = 'pt-BR';
+
+            const mensagem_usuario = document.querySelector('#mensagem-usuario');
+            var mensagem;
+
+            recognition.addEventListener('result', e => {
+                const transcript = Array.from(e.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('');
+
+                mensagem = transcript + ", ";
+                if (e.results[0].isFinal) {
+                    mensagem_usuario.value = mensagem_usuario.value + mensagem;
+                }
+                });
+            recognition.addEventListener('end', verificaStatus);
+            recognition.start();
+        }
+
+        function doStartStopCheck(){
+            if(ongoing == true){ // se tiver rodando, vai interromper
+                ongoing = false;
+                recognition.stop();
+                document.getElementById('btn-microfone').innerHTML = '<i class="fas fa-microphone"></i> Falar';
+                // Perform actions on button click (e.g., start/stop speech recognition, etc.)
+                togglePulsating(); // Optionally toggle pulsating animation on click
+            }
+            else if (recognition) { // se tiver instância SpeechRecognition, apenas reinicia
+                ongoing = true;
+                recognition.start();
+                document.getElementById('btn-microfone').innerHTML = '<i class="fas fa-microphone"></i> Interromper';
+                document.getElementById('btn-microfone').addC = '<i class="fas fa-microphone"></i> Interromper';
+                // Perform actions on button click (e.g., start/stop speech recognition, etc.)
+                togglePulsating(); // Optionally toggle pulsating animation on click
+            }
+            else { // se ainda não criou instância, chama a função para inicialização
+                console.log("init");
+                ongoing = true;
+                init();
+                document.getElementById('btn-microfone').innerHTML = '<i class="fas fa-microphone"></i> Interromper';
+                // Perform actions on button click (e.g., start/stop speech recognition, etc.)
+                togglePulsating(); // Optionally toggle pulsating animation on click
+            }
+        }
+    </script>
+</body>
+</html>
