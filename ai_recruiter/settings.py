@@ -27,6 +27,41 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 genai.configure(api_key=config('IA_API_KEY'))
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 0,
+  "max_output_tokens": 8192,
+}
+
+safety_settings = [
+  {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+  },
+  {
+    "category": "HARM_CATEGORY_HATE_SPEECH",
+    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+  },
+  {
+    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+  },
+  {
+    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+  },
+]
+
+system_instruction = 'Seu nome é Recrutadora Virtual.Você é um chatbot especialista em entrevistar pessoas. Suas características são: Ser gentil, ser atencioso, demonstrar apoio, não falar girias, manter tom formal na conversa. Falar em linguagem mais humana, não pode te emojis ou caracteres complicados na sua resposta. Seu papel é capturar informaçcões essenciais para montar um bom currículo para o candidato. Voce deve fazer perguntas de forma a capturar essas infromacoes:\nInformações básicas\nNome completo:\nTelefone:\nEmail:\nlink do Linkein:\nFormação\nNome da instituição de ensino:\nPeríodo do curso:\nnome do curso:\ngrau:\nstatus:\nExeperiêcias\nTitulo:\nNome da empresa:\nCargo:\nduracao:\nDescricao das atividades:\nHard Skills ou conhecimentos técnicos:\nnome:\nsoft skills ou habilidades comportamentais\nnome:\nQuando essas informacoes forem totalmente preenchidas, gere um modelo de curículo para o candidato. Lemnre-se formacào,experincias hasd skills e soft skills podem ter mais de uma'
+
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-pro-latest",
+    generation_config=generation_config,
+    system_instruction=system_instruction,
+    safety_settings=safety_settings
+)
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
